@@ -15,6 +15,8 @@ class Spider:
         self.player = player
         self.init_images(sprite_sheet)
         self.animation_count = 0
+        self.landed_recently = False  # variable to track landing grace period
+        self.landing_timer = 0  # Timer to track how long the grace period lasts
         self.animate()
 
     def init_images(self, sprite_sheet):
@@ -62,17 +64,27 @@ class Spider:
         collisions = self.get_collisions(collision_tiles, self.rect)
         if self.on_ground:
             collisions = collisions + self.get_collisions(empty_tiles, self.bottom_rect)
+
+        # Check if the grace period after landing is active
+        if self.landed_recently:
+            self.landing_timer += 1
+            if self.landing_timer > 10:  #10 frames of grace period
+                self.landed_recently = False
+                self.landing_timer = 0
+
         for tile in collisions:
             if self.velocity.x > 0 and tile.rect.x >= self.rect.x:
-                self.position.x = tile.rect.left - self.rect.w
-                self.rect.x = self.position.x
-                self.bottom_rect.x = self.position.x
-                self.is_facing_left = not self.is_facing_left
+                if self.on_ground and not self.landed_recently:
+                    self.position.x = tile.rect.left - self.rect.w
+                    self.rect.x = self.position.x
+                    self.bottom_rect.x = self.position.x
+                    self.is_facing_left = not self.is_facing_left
             elif self.velocity.x < 0 and self.is_facing_left and tile.rect.x <= self.rect.x:
-                self.position.x = tile.rect.right
-                self.rect.x = self.position.x
-                self.bottom_rect.x = self.position.x
-                self.is_facing_left = not self.is_facing_left
+                if self.on_ground and not self.landed_recently:
+                    self.position.x = tile.rect.right
+                    self.rect.x = self.position.x
+                    self.bottom_rect.x = self.position.x
+                    self.is_facing_left = not self.is_facing_left
 
     def vertical_movement(self, dt):
         self.velocity.y += self.acceleration.y * dt
@@ -93,6 +105,7 @@ class Spider:
                 self.position.y = tile.rect.top
                 self.rect.bottom = self.position.y
                 self.bottom_rect.bottom = self.position.y + TILESIZE
+                self.landed_recently = True
             elif self.velocity.y < 0:
                 self.velocity.y = 0
                 self.position.y = tile.rect.bottom + self.rect.h
@@ -107,6 +120,7 @@ class Spider:
                 self.position.y = tile.rect.top
                 self.rect.bottom = self.position.y
                 self.bottom_rect.bottom = self.position.y + TILESIZE
+                self.landed_recently = True
 
     def jump(self):
         jump_zone_left = self.position.x - (TILESIZE * 3) if self.is_facing_left else self.position.x + (TILESIZE * 1)

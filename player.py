@@ -15,7 +15,11 @@ class Player():
         self.animation_state = 'IDLE_RIGHT'
         self.animation_count = 0
         self.animate()
+        
         self.rect = self.image.get_rect(topleft = self.position)
+        
+        self.is_active = True
+        self.death_timer = 0
 
         self.level = level
         
@@ -72,6 +76,11 @@ class Player():
         jumping_image_left = [jumping_image_left]
         falling_image_right = [falling_image_right]
         falling_image_left = [falling_image_left]
+        
+        death_image_right = pygame.transform.rotate(sprite_sheet.get_sprite_from_id(13, 192), 180)
+        death_image_right.set_colorkey(BLACK)
+        death_image_left = pygame.transform.flip(death_image_right, True, False)
+        death_image_left.set_colorkey(BLACK)
 
         self.image_dict = {
             'IDLE_RIGHT': idle_images_right,
@@ -81,7 +90,9 @@ class Player():
             'JUMP_RIGHT': jumping_image_right,
             'JUMP_LEFT': jumping_image_left,
             'FALL_RIGHT': falling_image_right,
-            'FALL_LEFT': falling_image_left
+            'FALL_LEFT': falling_image_left,
+            'DEATH_RIGHT': death_image_right,
+            'DEATH_LEFT': death_image_left
         }   
 
     def update_animation_state(self):
@@ -111,13 +122,16 @@ class Player():
         self.display.blit(self.image, (self.rect.x - camera.offset.x, self.rect.y - camera.offset.y)) 
         #self.display.blit(self.image, (self.rect.x, self.rect.y)) 
 
-    def update(self, dt, collision_tiles, damage_tiles, one_way_tiles):
-        self.horizontal_movement(dt)
-        self.checkCollisionsx(collision_tiles, damage_tiles)
-        self.vertical_movement(dt)
-        self.checkCollisionsy(collision_tiles, one_way_tiles, damage_tiles)
-        self.update_animation_state()
-        self.animate()
+    def update(self, dt, collision_tiles, damage_tiles, one_way_tiles, player_data):
+        if self.is_active:
+            self.horizontal_movement(dt)
+            self.checkCollisionsx(collision_tiles, damage_tiles)
+            self.vertical_movement(dt)
+            self.checkCollisionsy(collision_tiles, one_way_tiles, damage_tiles)
+            self.update_animation_state()
+            self.animate()
+        else:
+            self.die(dt, player_data)
 
     def horizontal_movement(self, dt):
         self.acceleration.x = 0
@@ -142,7 +156,7 @@ class Player():
                 self.rect.x = self.position.x
         damages = self.get_collisions(damage_tiles)
         for tile in damages:
-            self.take_damage()
+            self.init_death()
         
     def checkCollisionsy(self, collision_tiles, one_way_tiles, damage_tiles):
         self.on_ground = False
@@ -169,7 +183,7 @@ class Player():
                 self.rect.bottom = self.position.y
         damages = self.get_collisions(damage_tiles)
         for tile in damages:
-            self.take_damage()
+            self.init_death()
 
     def vertical_movement(self, dt):
         self.velocity.y += self.acceleration.y * dt
@@ -199,5 +213,16 @@ class Player():
                 collisions.append(tile)
         return collisions
     
-    def take_damage(self):
-        self.level.reset()
+    def init_death(self):
+        self.is_active = False
+    
+    def die(self, dt, player_data):
+        if self.facing_left:
+            self.image = self.image_dict['DEATH_LEFT']
+        else:
+           self.image = self.image_dict['DEATH_RIGHT']
+        self.death_timer += 1
+        self.vertical_movement(dt)
+        if self.death_timer == 180:
+            player_data.lives -= 1
+            self.level.reset = True

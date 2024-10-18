@@ -2,8 +2,6 @@ import pygame
 import math
 from settings import *
 from utils import *
-import queue
-import numpy
 
 class LavaBubble:
     def __init__(self, pos, sprite_sheet, path, speed):
@@ -32,8 +30,8 @@ class LavaBubble:
         
         # Calculate the target position based on the next move and TILESIZE
         target = pygame.math.Vector2(
-            self.previous_pos.x + (next_move.x * numpy.sign(self.speed) * TILESIZE),
-            self.previous_pos.y + (next_move.y * numpy.sign(self.speed) * TILESIZE)
+            self.previous_pos.x + (next_move.x * (self.speed / abs(self.speed)) * TILESIZE),
+            self.previous_pos.y + (next_move.y * (self.speed / abs(self.speed)) * TILESIZE)
         )
 
         next_move = next_move.normalize()

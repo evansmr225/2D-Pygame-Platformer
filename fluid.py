@@ -3,7 +3,6 @@ import math
 from settings import *
 from utils import *
 import queue
-import numpy
 
 class Fluid:
     def __init__(self, sprite_sheet, surface):
@@ -22,7 +21,7 @@ class Fluid:
     def draw(self, surface, camera):
         number_of_tiles = camera.right_border
         for index in range(number_of_tiles):
-            surface.blit(self.image_list[index % len(self.image_list)], (TILESIZE * index - camera.offset.x, INTERNAL_DISPLAY_HEIGHT - camera.offset.y))
+            surface.blit(self.image_list[index % len(self.image_list)], (TILESIZE * index - camera.offset.x, INTERNAL_DISPLAY_HEIGHT - camera.offset.y + TILESIZE * 3))
 
     def update(self):
         if self.animation_index % (TARGET_FPS // 30) == 0:
