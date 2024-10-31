@@ -5,12 +5,12 @@ from utils import *
 import queue
 
 class Fluid:
-    def __init__(self, sprite_sheet, surface):
+    def __init__(self, sprite_sheet, fluid_type):
         self.image_list = []
-        for index in range(len(SS_DIC.get("water_top"))):
+        for index in range(len(SS_DIC.get(fluid_type + "_top"))):
             image = pygame.Surface((TILESIZE, TILESIZE * 2))
-            image_top = sprite_sheet.get_sprite_from_id(int(SS_DIC.get("water_top")[index]), SPRITE_SHEET_WIDTH)
-            image_bottom = sprite_sheet.get_sprite_from_id(int(SS_DIC.get("water_bottom")[index]), SPRITE_SHEET_WIDTH)
+            image_top = sprite_sheet.get_sprite_from_id(int(SS_DIC.get(fluid_type + "_top")[index]), SPRITE_SHEET_WIDTH)
+            image_bottom = sprite_sheet.get_sprite_from_id(int(SS_DIC.get(fluid_type + "_bottom")[index]), SPRITE_SHEET_WIDTH)
             image.blit(image_top, (0, 0))
             image.blit(image_bottom, (0, TILESIZE))
             image.set_colorkey(BLACK)

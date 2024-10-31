@@ -9,14 +9,12 @@ class Spider:
         self.position, self.velocity = pygame.math.Vector2(pos), pygame.math.Vector2(0, 0)
         self.acceleration = pygame.math.Vector2(0, self.gravity)
         self.rect = pygame.Rect(self.position, (TILESIZE * 2, TILESIZE))
-        self.bottom_rect = pygame.Rect((self.rect.x + TILESIZE, self.rect.y + TILESIZE), (TILESIZE, TILESIZE))
+        self.bottom_rect = pygame.Rect((self.rect.x, self.rect.y + TILESIZE), (TILESIZE * 2, TILESIZE))
         self.is_facing_left = False
         self.on_ground = True
         self.player = player
         self.init_images(sprite_sheet)
         self.animation_count = 0
-        self.landed_recently = False  # variable to track landing grace period
-        self.landing_timer = 0  # Timer to track how long the grace period lasts
         self.animate()
 
     def init_images(self, sprite_sheet):
@@ -65,22 +63,15 @@ class Spider:
         if self.on_ground:
             collisions = collisions + self.get_collisions(empty_tiles, self.bottom_rect)
 
-        # Check if the grace period after landing is active
-        if self.landed_recently:
-            self.landing_timer += 1
-            if self.landing_timer > 10:  #10 frames of grace period
-                self.landed_recently = False
-                self.landing_timer = 0
-
         for tile in collisions:
             if self.velocity.x > 0 and tile.rect.x >= self.rect.x:
-                if self.on_ground and not self.landed_recently:
+                if self.on_ground: 
                     self.position.x = tile.rect.left - self.rect.w
                     self.rect.x = self.position.x
                     self.bottom_rect.x = self.position.x
                     self.is_facing_left = not self.is_facing_left
             elif self.velocity.x < 0 and self.is_facing_left and tile.rect.x <= self.rect.x:
-                if self.on_ground and not self.landed_recently:
+                if self.on_ground: 
                     self.position.x = tile.rect.right
                     self.rect.x = self.position.x
                     self.bottom_rect.x = self.position.x
@@ -151,9 +142,9 @@ class Spider:
         surface.blit(self.image[0], (self.rect.x - camera.offset.x, self.rect.y - camera.offset.y))
         surface.blit(self.image[1], (self.rect.x + TILESIZE - camera.offset.x, self.rect.y - camera.offset.y))
         
-        # black_surface = pygame.Surface((TILESIZE, TILESIZE))
-        # black_surface.fill((0, 0, 0))
-        # surface.blit(black_surface, (self.bottom_rect.x - camera.offset.x, self.bottom_rect.y - camera.offset.y))
+        black_surface = pygame.Surface((TILESIZE * 2, TILESIZE))
+        black_surface.fill((0, 0, 0))
+        surface.blit(black_surface, (self.bottom_rect.x - camera.offset.x, self.bottom_rect.y - camera.offset.y))
     
     def update(self, collision_tiles, empty_tiles, one_way_tiles, dt):
         if self.is_facing_left == True:

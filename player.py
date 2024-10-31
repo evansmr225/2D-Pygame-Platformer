@@ -1,5 +1,13 @@
 import pygame
 from settings import *
+from falling_platform import *
+from enum import Enum
+
+
+class PlayerState(Enum):
+    NORMAL = 0
+    DYING = 1
+    ENDING = 2
 
 class Player():
     def __init__(self, sprite_sheet, display, initial_pos, level):
@@ -19,7 +27,13 @@ class Player():
         self.rect = self.image.get_rect(topleft = self.position)
         
         self.is_active = True
+        self.state = PlayerState.NORMAL
         self.death_timer = 0
+
+        self.bonk_sound = pygame.mixer.Sound('./sounds/bonk-46000.mp3')
+        self.jump_sound = pygame.mixer.Sound('./sounds/cartoon-jump-6462.mp3')
+        self.death_sound = pygame.mixer.Sound('./sounds/drop-sound-effect-240899.mp3')
+        self.victory_sound = pygame.mixer.Sound('./sounds/congratulations-deep-voice-172193.mp3')
 
         self.level = level
         
@@ -122,16 +136,18 @@ class Player():
         self.display.blit(self.image, (self.rect.x - camera.offset.x, self.rect.y - camera.offset.y)) 
         #self.display.blit(self.image, (self.rect.x, self.rect.y)) 
 
-    def update(self, dt, collision_tiles, damage_tiles, one_way_tiles, player_data):
-        if self.is_active:
+    def update(self, dt, collision_tiles, damage_tiles, one_way_tiles, end_goal, player_data):
+        if self.state == PlayerState.NORMAL:
             self.horizontal_movement(dt)
-            self.checkCollisionsx(collision_tiles, damage_tiles)
+            self.checkCollisionsx(collision_tiles, damage_tiles, end_goal)
             self.vertical_movement(dt)
-            self.checkCollisionsy(collision_tiles, one_way_tiles, damage_tiles)
+            self.checkCollisionsy(collision_tiles, one_way_tiles, damage_tiles, end_goal)
             self.update_animation_state()
             self.animate()
-        else:
+        elif self.state == PlayerState.DYING:
             self.die(dt, player_data)
+        elif self.state == PlayerState.ENDING:
+            self.end_level()
 
     def horizontal_movement(self, dt):
         self.acceleration.x = 0
@@ -145,7 +161,7 @@ class Player():
         self.position.x += self.velocity.x * dt + (self.acceleration.x * .5) * (dt * dt)
         self.rect.x = int(self.position.x)
 
-    def checkCollisionsx(self, collision_tiles, damage_tiles):
+    def checkCollisionsx(self, collision_tiles, damage_tiles, end_goal):
         collisions = self.get_collisions(collision_tiles)
         for tile in collisions:
             if self.velocity.x > 0:
@@ -156,9 +172,11 @@ class Player():
                 self.rect.x = self.position.x
         damages = self.get_collisions(damage_tiles)
         for tile in damages:
-            self.init_death()
+            self.state = PlayerState.DYING
+        if end_goal.rect.colliderect(self.rect):
+            self.state = PlayerState.ENDING
         
-    def checkCollisionsy(self, collision_tiles, one_way_tiles, damage_tiles):
+    def checkCollisionsy(self, collision_tiles, one_way_tiles, damage_tiles, end_goal):
         self.on_ground = False
         self.rect.bottom += 1
         collisions = self.get_collisions(collision_tiles)
@@ -169,10 +187,12 @@ class Player():
                 self.velocity.y = 0
                 self.position.y = tile.rect.top
                 self.rect.bottom = self.position.y
+                if hasattr(tile, 'player_collision_event'): tile.player_collision_event()
             elif self.velocity.y < 0:
                 self.velocity.y = 0
                 self.position.y = tile.rect.bottom + self.rect.h
                 self.rect.bottom = self.position.y
+                self.bonk_sound.play()
         one_way_collisions = self.get_collisions(one_way_tiles)
         for tile in one_way_collisions:
             if self.velocity.y > 0:
@@ -183,8 +203,12 @@ class Player():
                 self.rect.bottom = self.position.y
         damages = self.get_collisions(damage_tiles)
         for tile in damages:
-            self.init_death()
-
+            self.state = PlayerState.DYING
+            self.death_sound.play()
+        if end_goal.rect.colliderect(self.rect):
+            self.state = PlayerState.ENDING
+            self.victory_sound.play()
+        
     def vertical_movement(self, dt):
         self.velocity.y += self.acceleration.y * dt
         if self.velocity.y > 7: self.velocity.y = 7
@@ -196,6 +220,7 @@ class Player():
             self.is_jumping = True
             self.velocity.y -= 8
             self.on_ground = False
+            self.jump_sound.play()
 
     def limit_velocity(self, max_vel):
         if self.velocity.x > max_vel:
@@ -213,9 +238,6 @@ class Player():
                 collisions.append(tile)
         return collisions
     
-    def init_death(self):
-        self.is_active = False
-    
     def die(self, dt, player_data):
         if self.facing_left:
             self.image = self.image_dict['DEATH_LEFT']
@@ -226,3 +248,8 @@ class Player():
         if self.death_timer == 180:
             player_data.lives -= 1
             self.level.reset = True
+
+    def end_level(self):
+        self.death_timer += 1
+        if self.death_timer == 180:
+            self.level.completed = True
