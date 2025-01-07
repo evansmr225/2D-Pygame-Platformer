@@ -68,15 +68,19 @@ def run_level(level, internal_surface, window, player_data):
 
     # Handle level exit conditions and return appropriate values.
     if level.exited:
+        clock.tick()
         pygame.mixer.music.stop()  # Stop any playing music.
         return 0
     elif level.reset:
+        clock.tick()
         pygame.mixer.music.stop()
         return 1
     elif level.completed:
+        clock.tick()
         pygame.mixer.music.stop()
         return 2
     else:
+        clock.tick()
         pygame.mixer.music.stop()
         return -1
     
@@ -154,24 +158,24 @@ def run_game(internal_surface, window):
     # Run each level and manage transitions.
     while level_return_value == 1 and player_data.lives > 0:
         run_transition_screen(internal_surface, window, 1)
-        bg_image = pygame.image.load("./Forest_Background_0.png").convert_alpha()
-        level = Level(internal_surface, player_data, "water", './sounds/level_1_music.wav', bg_image, './level_1.csv', 1360)
+        bg_image = pygame.image.load(resource_path(os.path.join("assets", "images", "Forest_Background_0.png"))).convert_alpha()
+        level = Level(internal_surface, player_data, "water", resource_path(os.path.join("assets", "sounds", "level_1_music.wav")), bg_image, resource_path(os.path.join("assets", "levels", "level_1.csv")), 1360)
         level_return_value = run_level(level, internal_surface, window, player_data)
     if level_return_value == 0:
         return
     level_return_value = 1
     while level_return_value == 1 and player_data.lives > 0:
         run_transition_screen(internal_surface, window, 1)
-        bg_image = pygame.image.load("./Sky_Background_0.png").convert_alpha()
-        level = Level(internal_surface, player_data, "air", './sounds/level_2_music.wav', bg_image, './level_2.csv', 880)
+        bg_image = pygame.image.load(resource_path(os.path.join("assets", "images", "Sky_Background_0.png"))).convert_alpha()
+        level = Level(internal_surface, player_data, "air", resource_path(os.path.join("assets", "sounds", "level_2_music.wav")), bg_image, resource_path(os.path.join("assets", "levels", "level_2.csv")), 880)
         level_return_value = run_level(level, internal_surface, window, player_data)
     level_return_value = 1
     while level_return_value == 1 and player_data.lives > 0:
         run_transition_screen(internal_surface, window, 1)
-        bg_image = pygame.image.load("./Castle_Background_0.png").convert_alpha()
-        level = Level(internal_surface, player_data, "lava", './sounds/level_3_music.wav', bg_image, './level_3.csv', 880)
+        bg_image = pygame.image.load(resource_path(os.path.join(".", "Castle_Background_0.png"))).convert_alpha()
+        level = Level(internal_surface, player_data, "lava", resource_path(os.path.join("assets", "sounds", "level_3_music.wav")), bg_image, resource_path(os.path.join("assets", "level_3.csv")), 880)
         level_return_value = run_level(level, internal_surface, window, player_data)
-    # Check if the player has lives remaining.
+    
     if player_data.lives <= 0:
         run_game_over_screen(internal_surface, window) # Display "Game Over."
     else:

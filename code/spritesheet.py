@@ -1,4 +1,5 @@
 import pygame
+from utils import *
 from settings import *
 
 # Class to create a spritesheet object which can return tiled sprites from it
@@ -6,7 +7,7 @@ class Spritesheet:
     def __init__(self, filename):
         # Initialize the spritesheet by loading the image file
         self.filename = filename
-        self.sprite_sheet = pygame.image.load(filename).convert_alpha()  # Load the image with transparency
+        self.sprite_sheet = pygame.image.load(resource_path(os.path.join("assets", "images", filename))).convert_alpha()  # Load the image with transparency
 
     def get_sprite(self, x, y, w, h):
         # Extract a specific sprite from the spritesheet based on given coordinates and dimensions

@@ -1,5 +1,7 @@
 import pygame
 from settings import *
+from utils import *
+import os
 import math
 
 class FireBar:
@@ -7,7 +9,7 @@ class FireBar:
     class Ball:
         def __init__(self, pivot_pos, radius, angle):
             # Load the image for the fireball
-            self.image = pygame.image.load("./fireball.png").convert_alpha()
+            self.image = pygame.image.load(resource_path(os.path.join("assets", "images", "fireball.png"))).convert_alpha()
             self.draw_image = self.image.copy()  # Store a copy for later rotation
             self.radius = radius  # Set the radius from the pivot
             # Calculate initial position of the ball using polar coordinates (radius, angle)

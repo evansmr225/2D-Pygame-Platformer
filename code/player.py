@@ -1,6 +1,7 @@
 import pygame
 from settings import *
 from falling_platform import *
+from utils import *
 from enum import Enum
 
 # Enum to manage the player's state (normal, dying, or ending level)
@@ -35,10 +36,10 @@ class Player():
         self.death_timer = 0  # Timer for death animation
 
         # Sound effects
-        self.bonk_sound = pygame.mixer.Sound('./sounds/bonk-46000.mp3')
-        self.jump_sound = pygame.mixer.Sound('./sounds/cartoon-jump-6462.mp3')
-        self.death_sound = pygame.mixer.Sound('./sounds/drop-sound-effect-240899.mp3')
-        self.victory_sound = pygame.mixer.Sound('./sounds/congratulations-deep-voice-172193.mp3')
+        self.bonk_sound = pygame.mixer.Sound(resource_path(os.path.join("assets", "sounds", "bonk-46000.mp3")))
+        self.jump_sound = pygame.mixer.Sound(resource_path(os.path.join("assets", "sounds", "cartoon-jump-6462.mp3")))
+        self.death_sound = pygame.mixer.Sound(resource_path(os.path.join("assets", "sounds", "drop-sound-effect-240899.mp3")))
+        self.victory_sound = pygame.mixer.Sound(resource_path(os.path.join("assets", "sounds", "congratulations-deep-voice-172193.mp3")))
 
         # Reference to level object
         self.level = level

@@ -28,8 +28,8 @@ class Level():
         pygame.mixer.music.play(-1)  # Play the music on loop
 
         # Initialize sprite sheets for tiles and the player
-        sprite_sheet = Spritesheet('./tile_map.png')
-        player_sprite_sheet = Spritesheet('./player.png')
+        sprite_sheet = Spritesheet('tile_map.png')
+        player_sprite_sheet = Spritesheet('player.png')
         
         # Lists which hold data of tiles and entities so they can be updated and drawn
         self.empty_tiles = []
