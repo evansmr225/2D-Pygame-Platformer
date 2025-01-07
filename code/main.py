@@ -172,8 +172,8 @@ def run_game(internal_surface, window):
     level_return_value = 1
     while level_return_value == 1 and player_data.lives > 0:
         run_transition_screen(internal_surface, window, 1)
-        bg_image = pygame.image.load(resource_path(os.path.join(".", "Castle_Background_0.png"))).convert_alpha()
-        level = Level(internal_surface, player_data, "lava", resource_path(os.path.join("assets", "sounds", "level_3_music.wav")), bg_image, resource_path(os.path.join("assets", "level_3.csv")), 880)
+        bg_image = pygame.image.load(resource_path(os.path.join("assets", "images", "Castle_Background_0.png"))).convert_alpha()
+        level = Level(internal_surface, player_data, "lava", resource_path(os.path.join("assets", "sounds", "level_3_music.wav")), bg_image, resource_path(os.path.join("assets", "levels", "level_3.csv")), 880)
         level_return_value = run_level(level, internal_surface, window, player_data)
     
     if player_data.lives <= 0:
